@@ -1,0 +1,5 @@
+{"id": 0, "question": "What is Iris sphincter muscle?", "answers": ["Iris sphincter muscle", "In humans"], "gt_index": 9, "hit_rank": 0, "predicted_indices": [9, 8, 7, 6], "predicted_scores": [10.0, 9.0, 8.0, 7.0]}
+{"id": 1, "question": "What is Ticket balance?", "answers": ["balance by legally requiring"], "gt_index": 8, "hit_rank": 0, "predicted_indices": [9, 8, 7, 6], "predicted_scores": [1.0, 1.0, 1.0, 1.0]}
+{"id": 2, "question": "Where is American Expeditionary Forces?", "answers": "1st Division fired", "gt_index": 7, "hit_rank": 0, "predicted_indices": [7, 9, 8, 6], "predicted_scores": [1.0, 1.0, 1.0, 1.0]}
+{"id": 3, "question": "Who was Allies of World War II?", "answers": ["were the countries that together opposed the Axis powers", "countries"], "gt_index": 6, "hit_rank": 0, "predicted_indices": [6, 7, 8, 9], "predicted_scores": [1.0, 1.0, 1.0, 1.0]}
+{"id": 4, "question": "Who is Syleena Johnson?", "answers": ["managed by DYG Management"], "gt_index": 5, "hit_rank": 0, "predicted_indices": [9, 8, 7, 5], "predicted_scores": [1.0, 1.0, 1.0, 1.0]}

@@ -1,0 +1,5 @@
+{"id": 0, "question": "What is Iris sphincter muscle?", "predicted_indices": [9, 8, 7, 6], "predicted_scores": [10.0, 9.0, 8.0, 7.0]}
+{"id": 1, "question": "What is Ticket balance?", "predicted_indices": [8, 9, 7, 6], "predicted_scores": [1.0, 1.0, 1.0, 1.0]}
+{"id": 2, "question": "Where is American Expeditionary Forces?", "predicted_indices": [7, 9, 8, 6], "predicted_scores": [1.0, 1.0, 1.0, 1.0]}
+{"id": 3, "question": "Who was Allies of World War II?", "predicted_indices": [6, 7, 8, 9], "predicted_scores": [1.0, 1.0, 1.0, 1.0]}
+{"id": 4, "question": "Who is Syleena Johnson?", "predicted_indices": [5, 9, 8, 6], "predicted_scores": [1.0, 1.0, 1.0, 1.0]}
