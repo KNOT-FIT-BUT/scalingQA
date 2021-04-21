@@ -335,14 +335,6 @@ The training takes about 1.5h on 2080Ti 12 GB GPU for both datasets. In the pape
 * [NQ-pruner](https://www.stud.fit.vutbr.cz/~ifajcik/r2d2/NQ/irrelevant_doc_cls_google_electra-base-discriminator_acc_0.9049_2020-12-26_23:51.pt.zip)
 * [Trivia-pruner](https://www.stud.fit.vutbr.cz/~ifajcik/r2d2/Trivia/irrelevant_doc_cls_google_electra-base-discriminator_acc_0.8747_2021-02-08_15:08.pt.zip)
 
-Due to path collision. you will need to link `index_pruning` folder to root directory by running
-
-```
-ln -s scalingqa/index_pruning/ index_pruning
-``` 
-
-in the root directory to use these checkpoints.
-
 ## 3. Inferring Irrelevant Passage's Probabilities <a name="prunerinference"></a>
 
 Now when the model is training, the next step is to extract the irrelevance probability for each passage. Extract
