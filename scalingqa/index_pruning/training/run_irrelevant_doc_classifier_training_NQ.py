@@ -16,7 +16,8 @@ config = {
     "training_data": "train.jsonl",
     "validation_data": "val.jsonl",
     "test_data": "test.jsonl",
-
+    
+    "min_p_to_save": 0.88, # save disk space, do not save checkpoints with performance (accuracy) lesser than this
     "x-negatives": 2,  # how many times more negative passages are in the training set
 
     "scheduler": "linear",
