@@ -57,6 +57,9 @@ class MockDataset(Dataset):
     def __len__(self):
         return len(self.batches)
 
+    @staticmethod
+    def collate_fn(batch: List[ReaderBatch]) -> ReaderBatch:
+        return batch[0]
 
 class TestAnswerExtractor(unittest.TestCase):
     def setUp(self):

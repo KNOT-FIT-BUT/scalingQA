@@ -8,6 +8,7 @@ Module with class for extracting answers.
 from typing import Generator, Tuple, List, Optional
 
 import torch
+from torch.utils.data import DataLoader
 
 from .models.reader import Reader
 from .datasets.reader_dataset import ReaderBatch, ReaderDataset
@@ -31,7 +32,8 @@ class AnswerExtractor(object):
         self.model = model.to(useDevice)
         self.device = useDevice
 
-    def extract(self, dataset: ReaderDataset, topK: int = 50, maxSpanLen: Optional[int] = None) ->\
+    def extract(self, dataset: ReaderDataset, topK: int = 50, maxSpanLen: Optional[int] = None,
+                loaderWorkers: int = 0) -> \
             Generator[Tuple[str, List[str], List[float], List[int], List[Tuple[int, int]]], None, None]:
         """
         Performs answer extraction on given dataset.
@@ -44,13 +46,27 @@ class AnswerExtractor(object):
             before the topK.
             WARNING: the span length is not in the model tokens but in whitespace tokens (.split(" "))
         :type maxSpanLen: maxSpanLen: Optional[int]
+        :param loaderWorkers: Values >0 activates multi processing reading of dataset and the value determines number
+            of subprocesses that will be used for reading (the main process is not counted).
+            If == 0 than the single process processing is activated.
+        :type loaderWorkers: int
         :return: Generates (query, extracted answers, extraction scores, passage ids, character offsets) tuples.
         Answers are in descending sorted order according to score.
         :rtype: Generator[Tuple[str, List[str], List[float], List[int], List[Tuple[int, int]]], None, None]
         """
 
         self.model.eval()
-        for batch in dataset:
+
+        loader = DataLoader(
+            dataset=dataset,
+            collate_fn=dataset.collate_fn,
+            batch_size=1,
+            shuffle=False,
+            num_workers=loaderWorkers,
+            pin_memory=torch.device("cpu") != self.device
+        )
+
+        for batch in loader:
             batchOnDevice = batch.to(self.device)
             answers, scores, passageIds, characterOffsets = self.batchExtract(batchOnDevice, topK, maxSpanLen)
             yield batch.query, answers, scores, passageIds, characterOffsets
@@ -77,10 +93,10 @@ class AnswerExtractor(object):
         """
 
         startScores, endScores, jointScore, selectionScore = self.model(inputSequences=batch.inputSequences,
-                                                                           inputSequencesAttentionMask=batch.inputSequencesAttentionMask,
-                                                                           passageMask=batch.passageMask,
-                                                                           longestPassage=batch.longestPassage,
-                                                                           tokenType=batch.tokenType)
+                                                                        inputSequencesAttentionMask=batch.inputSequencesAttentionMask,
+                                                                        passageMask=batch.passageMask,
+                                                                        longestPassage=batch.longestPassage,
+                                                                        tokenType=batch.tokenType)
 
         logProbs = Reader.scores2logSpanProb(startScores, endScores, jointScore, selectionScore)
         sortedLogProbs, sortedLogProbsInd = torch.sort(logProbs.flatten(), descending=True)
