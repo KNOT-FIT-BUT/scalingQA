@@ -5,7 +5,7 @@ Tests for answer extractor.
 
 :author:     Martin Dočekal
 """
-
+import multiprocessing
 import unittest
 from typing import List
 from unittest import mock
@@ -50,6 +50,9 @@ class MockDataset(Dataset):
         """
 
         self.batches = batches
+        self.calledActivateMultiprocessing = False
+        self.storedSkipAnswerMatching = False
+        self.storedUseGroundTruthPassage = True
 
     def __getitem__(self, item):
         return self.batches[item]
@@ -60,6 +63,26 @@ class MockDataset(Dataset):
     @staticmethod
     def collate_fn(batch: List[ReaderBatch]) -> ReaderBatch:
         return batch[0]
+
+    def activateMultiprocessing(self):
+        self.calledActivateMultiprocessing = True
+
+    @property
+    def skipAnswerMatching(self):
+        return self.storedSkipAnswerMatching
+
+    @skipAnswerMatching.setter
+    def skipAnswerMatching(self, x: bool):
+        self.storedSkipAnswerMatching = x
+
+    @property
+    def useGroundTruthPassage(self):
+        return self.storedUseGroundTruthPassage
+
+    @useGroundTruthPassage.setter
+    def useGroundTruthPassage(self, x: bool):
+        self.storedUseGroundTruthPassage = x
+
 
 class TestAnswerExtractor(unittest.TestCase):
     def setUp(self):
@@ -113,6 +136,31 @@ class TestAnswerExtractor(unittest.TestCase):
 
         self.dataset = MockDataset(batches.readerBatchesFirst)
 
+        self.gtQueries = [
+            "What is Iris sphincter muscle?",
+            "What is Ticket balance?",
+            "Where is American Expeditionary Forces?",
+            "Who was Allies of World War II?",
+            "Who is Syleena Johnson?"
+        ]
+        self.gtPassageIds = [9, 8, 7, 6, 5]
+
+        self.expectedAnswers = [
+            ["Iris sp", "Iris"],
+            ["Some countries", "Some"],
+            ["the 1st", "the"],
+            ["were the", "were"],
+            ["Johnson is", "Johnson"]
+        ]
+
+        self.gtSpanCharOffset = [
+            [(1, 8), (1, 5)],
+            [(1, 15), (1, 5)],
+            [(1, 8), (1, 4)],
+            [(1, 9), (1, 5)],
+            [(1, 11), (1, 8)]
+        ]
+
     def test_init(self):
         dev = torch.device("cpu")
         extractor = AnswerExtractor(self.model, dev)
@@ -131,52 +179,40 @@ class TestAnswerExtractor(unittest.TestCase):
     def test_extract(self):
         extractor = AnswerExtractor(self.mockModel, torch.device("cpu"))
 
-        gtQueries = [
-            "What is Iris sphincter muscle?",
-            "What is Ticket balance?",
-            "Where is American Expeditionary Forces?",
-            "Who was Allies of World War II?",
-            "Who is Syleena Johnson?"
-        ]
-        gtPassageIds = [9, 8, 7, 6, 5]
-
-        expectedAnswers = [
-            ["Iris sp", "Iris"],
-            ["Some countries", "Some"],
-            ["the 1st", "the"],
-            ["were the", "were"],
-            ["Johnson is", "Johnson"]
-        ]
-
-        gtSpanCharOffset = [
-            [(1, 8), (1, 5)],
-            [(1, 15), (1, 5)],
-            [(1, 8), (1, 4)],
-            [(1, 9), (1, 5)],
-            [(1, 11), (1, 8)]
-        ]
-
         with mock.patch.object(AbstractReader, "scores2logSpanProb", self.mockModel.scores2logSpanProb):
             for i, (query, answers, scores, passageIds, spanCharOff) in enumerate(extractor.extract(self.dataset, 2)):
-                self.assertEqual(query, gtQueries[i])
-                self.assertListEqual(answers, expectedAnswers[i])
+                self.assertEqual(query, self.gtQueries[i])
+                self.assertListEqual(answers, self.expectedAnswers[i])
                 self.assertEqual(len(scores), 2)
                 self.assertAlmostEqual(scores[0], -0.5)
                 self.assertAlmostEqual(scores[1], -0.9327521295671886)
-                self.assertListEqual(passageIds, [gtPassageIds[i], gtPassageIds[i]])
-                self.assertListEqual(spanCharOff, gtSpanCharOffset[i])
+                self.assertListEqual(passageIds, [self.gtPassageIds[i], self.gtPassageIds[i]])
+                self.assertListEqual(spanCharOff, self.gtSpanCharOffset[i])
+
+            self.assertFalse(self.dataset.calledActivateMultiprocessing)
+            self.assertTrue(self.dataset.storedSkipAnswerMatching)
+            self.assertFalse(self.dataset.storedUseGroundTruthPassage)
+
+    def test_extract_mul_proc(self):
+        extractor = AnswerExtractor(self.mockModel, torch.device("cpu"))
+
+        with mock.patch.object(AbstractReader, "scores2logSpanProb", self.mockModel.scores2logSpanProb):
+            for i, (query, answers, scores, passageIds, spanCharOff) in enumerate(extractor.extract(self.dataset, 2,
+                                                                                                    loaderWorkers=multiprocessing.cpu_count())):
+                self.assertEqual(query, self.gtQueries[i])
+                self.assertListEqual(answers, self.expectedAnswers[i])
+                self.assertEqual(len(scores), 2)
+                self.assertAlmostEqual(scores[0], -0.5)
+                self.assertAlmostEqual(scores[1], -0.9327521295671886)
+                self.assertListEqual(passageIds, [self.gtPassageIds[i], self.gtPassageIds[i]])
+                self.assertListEqual(spanCharOff, self.gtSpanCharOffset[i])
+
+            self.assertTrue(self.dataset.calledActivateMultiprocessing)
+            self.assertTrue(self.dataset.storedSkipAnswerMatching)
+            self.assertFalse(self.dataset.storedUseGroundTruthPassage)
 
     def test_extract_max_len(self):
         extractor = AnswerExtractor(self.mockModel, torch.device("cpu"))
-
-        gtQueries = [
-            "What is Iris sphincter muscle?",
-            "What is Ticket balance?",
-            "Where is American Expeditionary Forces?",
-            "Who was Allies of World War II?",
-            "Who is Syleena Johnson?"
-        ]
-        gtPassageIds = [9, 8, 7, 6, 5]
 
         expectedAnswersMaxLen = [
             ["Iris"],
@@ -196,12 +232,13 @@ class TestAnswerExtractor(unittest.TestCase):
 
         with mock.patch.object(AbstractReader, "scores2logSpanProb", self.mockModel.scores2logSpanProb):
             # test maxlen
-            for i, (query, answers, scores, passageIds, spanCharOff) in enumerate(extractor.extract(self.dataset, 1, 1)):
-                self.assertEqual(query, gtQueries[i])
+            for i, (query, answers, scores, passageIds, spanCharOff) in enumerate(
+                    extractor.extract(self.dataset, 1, 1)):
+                self.assertEqual(query, self.gtQueries[i])
                 self.assertListEqual(answers, expectedAnswersMaxLen[i])
                 self.assertEqual(len(scores), 1)
                 self.assertAlmostEqual(scores[0], -0.9327521295671886)
-                self.assertListEqual(passageIds, [gtPassageIds[i]])
+                self.assertListEqual(passageIds, [self.gtPassageIds[i]])
                 self.assertListEqual(spanCharOff, gtSpanCharOffset[i])
 
     def test_batchExtract(self):

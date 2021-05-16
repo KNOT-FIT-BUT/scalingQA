@@ -65,6 +65,10 @@ class AnswerExtractor(object):
             num_workers=loaderWorkers,
             pin_memory=torch.device("cpu") != self.device
         )
+        if loaderWorkers !=0:
+            dataset.activateMultiprocessing()
+        dataset.skipAnswerMatching = True
+        dataset.useGroundTruthPassage = False
 
         for batch in loader:
             batchOnDevice = batch.to(self.device)
