@@ -67,14 +67,14 @@ cd scalingQA; python -m pip install -r requirements.txt; python setup.py install
 
 Following hyperlinks contain preprocessed datasets required for training
 
-* [NQ-open processed via DPR retriever (for reranker/reader training)](https://www.stud.fit.vutbr.cz/~ifajcik/r2d2/NQ/data/nq_open_retrieved.zip)
-* [TriviaQA-open processed via DPR multiset retriever (for reranker/reader training)](https://www.stud.fit.vutbr.cz/~ifajcik/r2d2/Trivia/data/triviaqa_open_retrieved.zip)
+* [NQ-open processed via DPR retriever (for reranker/reader training)](http://r2d2.fit.vutbr.cz/data/nq_open_retrieved.zip)
+* [TriviaQA-open processed via DPR multiset retriever (for reranker/reader training)](http://r2d2.fit.vutbr.cz/data/triviaqa_open_retrieved.zip)
 
 These files were created using DPR retrieval over all 21M passages of Wikipedia.  
 Additionaly, we also release original files we used as inputs to DPR to generate the preprocessed datasets for readers and reranker.
 
-* [NQ-open](https://www.stud.fit.vutbr.cz/~ifajcik/r2d2/NQ/data/nq_open.zip)
-* [TriviaQA-open](https://www.stud.fit.vutbr.cz/~ifajcik/r2d2/Trivia/data/triviaqa_open.zip)
+* [NQ-open](http://r2d2.fit.vutbr.cz/data/nq_open.zip)
+* [TriviaQA-open](http://r2d2.fit.vutbr.cz/data/triviaqa_open.zip)
 
 If you would like to process your custom data, follow "Retrieving the results via DPR (optional)" guide at the end of
 this README.
@@ -82,9 +82,11 @@ this README.
 #### Index
 
 SQLite database of 21M passages is
-available [here](https://www.stud.fit.vutbr.cz/~ifajcik/r2d2/corpora/wiki2018_dpr_blocks.db.zip).  
-Embedding matrix for full 21M passages is
-available [here](https://www.stud.fit.vutbr.cz/~ifajcik/r2d2/NQ/DPR_nqsingle_official.h5.zip).
+available [here](http://r2d2.fit.vutbr.cz/data/wiki2018_dpr_blocks.db.zip).  
+Embedding matrix for full 21M passages trained on NQ is
+available [here](http://r2d2.fit.vutbr.cz/index/nq-open/DPR_nqsingle_official.h5.zip).
+Embedding matrix for full 21M passages trained on TQ is
+available [here](http://r2d2.fit.vutbr.cz/index/trivia/DPR_multiset_official.h5.zip).
 
 # Training R2-D2 models
 
@@ -241,9 +243,9 @@ You can use option `fp16` to save checkpoint in 16-bit precision.
 
 ## Retrieving the Data via DPR (Optional) <a name="retrievingviadpr"></a>
 
-Here we describe how to process your custom dataset which follows the same format
-as [NQ-open](https://www.stud.fit.vutbr.cz/~ifajcik/r2d2/NQ/data/nq_open_retrieved.zip)
-or [TriviaQA-open](https://www.stud.fit.vutbr.cz/~ifajcik/r2d2/NQ/data/nq_open_retrieved.zip) via retriever.   
+Here we describe how to process your custom dataset which follows the same format 
+as [NQ-open](http://r2d2.fit.vutbr.cz/data/nq_open_retrieved.zip)
+or [TriviaQA-open](http://r2d2.fit.vutbr.cz/data/triviaqa_open_retrieved.zip) via retriever.   
 Firstly, you will need to adjust the configuration in `scalingqa/retriever/extract_DPR_predictions.py` script. You will
 need to change the contents of `config` dictionary at the start of the file. Here is an example, how this configuration
 might look:
@@ -332,8 +334,8 @@ example, the defaults for `NQ` dataset are:
 
 The training takes about 1.5h on 2080Ti 12 GB GPU for both datasets. In the paper we use the following checkpoints.
 
-* [NQ-pruner](https://www.stud.fit.vutbr.cz/~ifajcik/r2d2/NQ/irrelevant_doc_cls_google_electra-base-discriminator_acc_0.9049_2020-12-26_23:51.pt.zip)
-* [Trivia-pruner](https://www.stud.fit.vutbr.cz/~ifajcik/r2d2/Trivia/irrelevant_doc_cls_google_electra-base-discriminator_acc_0.8747_2021-02-08_15:08.pt.zip)
+* [NQ-pruner](http://r2d2.fit.vutbr.cz/checkpoints/nq-open/irrelevant_doc_cls_google_electra-base-discriminator_acc_0.9049_2020-12-26_23:51.pt.zip)
+* [Trivia-pruner](http://r2d2.fit.vutbr.cz/checkpoints/trivia/irrelevant_doc_cls_google_electra-base-discriminator_acc_0.8747_2021-02-08_15:08.pt.zip)
 
 ## 3. Inferring Irrelevant Passage's Probabilities <a name="prunerinference"></a>
 
@@ -358,8 +360,8 @@ available in the [official DPR implementation](https://github.com/facebookresear
 
 You can get the extracted probabilities we used in the paper from the following links:
 
-* [NQ-open](https://www.stud.fit.vutbr.cz/~ifajcik/r2d2/NQ/psgs_w100_irrelevant_passage_probs_electra_nqopen.h5.zip)
-* [Trivia-open](https://www.stud.fit.vutbr.cz/~ifajcik/r2d2/Trivia/psgs_w100_irrelevant_passage_probs_electra_trivia.h5.zip)
+* [NQ-open](http://r2d2.fit.vutbr.cz/data/psgs_w100_irrelevant_passage_probs_electra_nqopen.h5.zip)
+* [Trivia-open](http://r2d2.fit.vutbr.cz/data/psgs_w100_irrelevant_passage_probs_electra_trivia.h5.zip)
 
 ## 4. Choosing the Relevant Documents
 
