@@ -84,8 +84,8 @@ this README.
 SQLite database of 21M passages is
 available [here](http://r2d2.fit.vutbr.cz/data/wiki2018_dpr_blocks.db.zip).  
 Embedding matrix for full 21M passages trained on NQ is
-available [here](http://r2d2.fit.vutbr.cz/index/nq-open/DPR_nqsingle_official.h5.zip).
-Embedding matrix for full 21M passages trained on TQ is
+available [here](http://r2d2.fit.vutbr.cz/index/nq-open/DPR_nqsingle_official.h5.zip).  
+Embedding matrix for full 21M passages trained on multiple datasets (used for Trivia experiments in the paper) is
 available [here](http://r2d2.fit.vutbr.cz/index/trivia/DPR_multiset_official.h5.zip).
 
 # Training R2-D2 models
