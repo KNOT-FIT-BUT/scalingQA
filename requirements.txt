@@ -9,7 +9,7 @@ tables==3.6.1
 torch>=1.6.0,<=1.7.1
 torchtext==0.4.0
 tqdm>=4.27
-transformers==4.3.3
+transformers>=4.3.3
 windPyTorchUtils==1.0.2
 windPyUtils==1.0.6
 hyperopt==0.2.5
